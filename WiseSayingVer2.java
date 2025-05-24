@@ -1,3 +1,6 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -5,8 +8,8 @@ import java.util.StringTokenizer;
 
 public class WiseSayingVer2 {
     static Scanner sc = new Scanner(System.in);
-
-    static int lastId = 1; // 다음에 사용할 Id
+    static String filePath = "db/wideSaying/";
+    static int lastId = 0;
 
     static String regex = ".*[!@#$%^&*()\\-_=+\\[\\]{}|\\\\;:'\",<>/?].*";
 
@@ -14,6 +17,12 @@ public class WiseSayingVer2 {
     static Map<Integer, Words> list = new HashMap<>(); // 명언 저장 레포지토리 <id, 명언정보>
     public static void main(String[] args) {
         System.out.println("== 명언 앱 ==");
+        list = jsonController.read();
+
+        // Controller로 부터 데이터를 불러온 경우
+        if(!list.isEmpty()) {
+            getLastId();
+        }
 
         // 명령입력
         label:
@@ -29,6 +38,9 @@ public class WiseSayingVer2 {
                     break;
                 case "목록":
                     showList();
+                    break;
+                case"빌드":
+                    jsonController.build(list);
                     break;
                 default:
                     if (cmd.startsWith("삭제")) {
@@ -110,7 +122,7 @@ public class WiseSayingVer2 {
         System.out.println("----------------------");
 
         // 리스트 출력
-        for(int i = lastId - 1; i >= 1; i--) {
+        for(int i = lastId; i >= 1; i--) {
             Words one = list.get(i);
 
             // 레포지토리에 존재하지 않는 정보는 출력하지 않는다.
@@ -137,9 +149,17 @@ public class WiseSayingVer2 {
         } while(isAsterisk(writer));
 
         // 명언 레포지토리에 입력 정보를 삽입
+        lastId++;
         list.put(lastId, new Words(wiseSay, writer));
         System.out.println(lastId + "번 명언이 등록되었습니다.");
+    }
 
-        lastId++;
+    // 파일로부터 최신Id를 출력
+    private static void getLastId() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath + "lastId.txt"))) {
+            lastId = Integer.parseInt(reader.readLine());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
