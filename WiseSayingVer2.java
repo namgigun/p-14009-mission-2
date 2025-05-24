@@ -39,7 +39,7 @@ public class WiseSayingVer2 {
                 case "목록":
                     showList();
                     break;
-                case"빌드":
+                case "빌드":
                     jsonController.build(list);
                     break;
                 default:
